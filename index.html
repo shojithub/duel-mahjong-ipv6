@@ -2,7 +2,10 @@
 <html lang="ja">
 <head>
   <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover" />
+  <meta name="theme-color" content="#071310" />
+  <meta name="apple-mobile-web-app-capable" content="yes" />
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
   <title>双龍麻雀 P2P — IPv6優先デュアルスタック 2人対戦リーチ麻雀</title>
   <style>
     :root {
@@ -26,17 +29,25 @@
       --tile-sm-h: 45px;
     }
 
-    * { box-sizing: border-box; margin: 0; padding: 0; }
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+      -webkit-tap-highlight-color: transparent;
+    }
 
     body {
       font-family: -apple-system, BlinkMacSystemFont, "Hiragino Sans", "Noto Sans JP", "Yu Gothic UI", sans-serif;
       background: radial-gradient(circle at 50% 25%, #123528 0%, var(--bg-dark) 80%);
       color: var(--text-main);
       min-height: 100vh;
+      min-height: 100dvh;
       display: flex;
       flex-direction: column;
       overflow-x: hidden;
       user-select: none;
+      -webkit-user-select: none;
+      touch-action: manipulation;
     }
 
     /* Top Status Bar */
@@ -1200,6 +1211,422 @@
       flex-wrap: wrap;
       font-size: 12px;
     }
+
+    /* =====================================================================
+       Smartphone & Touch-First UI Enhancements (Portrait & Landscape)
+       ===================================================================== */
+    .mobile-only { display: none; }
+
+    /* Disable sticky CSS :hover lift on touchscreens; rely on explicit .touch-selected */
+    @media (hover: none), (pointer: coarse) {
+      .tile.interactive:hover {
+        transform: none;
+        box-shadow: 0 4px 0 #155e46, 0 6px 8px rgba(0, 0, 0, 0.45);
+      }
+    }
+
+    .tile.touch-selected {
+      transform: translateY(-14px) scale(1.22) !important;
+      z-index: 24;
+      outline: 2.5px solid var(--gold);
+      box-shadow: 0 14px 20px rgba(0, 0, 0, 0.72), 0 0 16px rgba(245, 196, 81, 0.8) !important;
+    }
+
+    .act-discard-confirm {
+      background: linear-gradient(135deg, #f5c451, #d97706);
+      color: #111827;
+      border: 1px solid #fde68a;
+      box-shadow: 0 4px 14px rgba(245, 196, 81, 0.45);
+    }
+
+    .touch-select-bar {
+      background: rgba(15, 23, 42, 0.88);
+      border: 1px solid rgba(245, 196, 81, 0.45);
+      border-radius: 8px;
+      padding: 4px 9px;
+      font-size: 11.5px;
+      color: #fef3c7;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 6px;
+    }
+
+    .touch-select-bar.hidden { display: none; }
+
+    /* Floating Opponent Chat / Stamp Bubble for Mobile Zero-Drawer Visibility */
+    .chat-toast {
+      position: absolute;
+      left: 14px;
+      top: 52px;
+      max-width: min(300px, 82vw);
+      background: rgba(15, 23, 42, 0.94);
+      border: 1.5px solid var(--cyan);
+      border-radius: 12px 12px 12px 2px;
+      padding: 6px 11px;
+      font-size: 12px;
+      font-weight: 700;
+      color: #f8fafc;
+      box-shadow: 0 8px 20px rgba(0, 0, 0, 0.6);
+      z-index: 31;
+      pointer-events: none;
+      opacity: 0;
+      transform: translateY(-6px);
+      transition: opacity 0.2s ease, transform 0.2s ease;
+    }
+
+    .chat-toast.show {
+      opacity: 1;
+      transform: translateY(0);
+    }
+
+    .unread-dot {
+      display: inline-block;
+      width: 8px;
+      height: 8px;
+      border-radius: 50%;
+      background: #ef4444;
+      box-shadow: 0 0 6px #ef4444;
+      margin-left: 3px;
+      vertical-align: middle;
+    }
+
+    .unread-dot.hidden { display: none; }
+
+    .mobile-sheet-backdrop {
+      display: none;
+    }
+
+    .mobile-net-topbar {
+      display: none;
+    }
+
+    /* Tablet & Smartphone App-Shell Mode (Zero Page Scroll + Bottom Sheet Drawer) */
+    @media (max-width: 960px) {
+      .mobile-only { display: inline-flex; align-items: center; justify-content: center; }
+
+      body {
+        height: 100vh;
+        height: 100dvh;
+        overflow: hidden;
+      }
+
+      .topbar {
+        padding: max(6px, env(safe-area-inset-top)) 8px 6px 8px;
+        gap: 5px;
+        flex-shrink: 0;
+      }
+
+      .brand { gap: 7px; }
+      .brand-logo { width: 25px; height: 25px; font-size: 13px; border-radius: 6px; }
+      .brand-title { font-size: 13px; }
+      .brand-sub { display: none; }
+
+      .top-actions {
+        gap: 4px;
+        flex-wrap: wrap;
+        justify-content: flex-end;
+      }
+
+      .top-actions button {
+        padding: 5px 8px;
+        font-size: 11px;
+        min-height: 30px;
+      }
+
+      /* Horizontal swipeable telemetry strip so IPv6 badges stay accessible in 1 thin row */
+      .telemetry-pills {
+        order: 3;
+        width: 100%;
+        flex-wrap: nowrap;
+        overflow-x: auto;
+        scrollbar-width: none;
+        -webkit-overflow-scrolling: touch;
+        gap: 4px;
+        padding-bottom: 1px;
+      }
+      .telemetry-pills::-webkit-scrollbar { display: none; }
+      .telemetry-pills .pill { font-size: 10px; padding: 2px 7px; }
+
+      /* Matchmaking Drawer becomes a Full-Screen Scrollable Modal on Mobile */
+      .net-drawer {
+        position: fixed;
+        inset: 0;
+        z-index: 58;
+        overflow-y: auto;
+        -webkit-overflow-scrolling: touch;
+        padding: max(10px, env(safe-area-inset-top)) 12px calc(24px + env(safe-area-inset-bottom)) 12px;
+        align-content: start;
+      }
+
+      .mobile-net-topbar {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        padding-bottom: 8px;
+        margin-bottom: 4px;
+        border-bottom: 1px solid rgba(56, 189, 248, 0.25);
+      }
+
+      /* Workspace & Felt Board fill remaining 100dvh cleanly */
+      .workspace {
+        flex: 1;
+        min-height: 0;
+        padding: 4px 6px max(6px, env(safe-area-inset-bottom)) 6px;
+        gap: 0;
+      }
+
+      .mahjong-board {
+        height: 100%;
+        min-height: 0;
+        padding: 7px 8px;
+        border-width: 2px;
+        border-radius: 12px;
+      }
+
+      /* Sidebar becomes Slide-Up Bottom Sheet on Mobile */
+      .mobile-sheet-backdrop.open {
+        display: block;
+        position: fixed;
+        inset: 0;
+        background: rgba(2, 6, 23, 0.65);
+        backdrop-filter: blur(2px);
+        z-index: 54;
+      }
+
+      .side-panel {
+        position: fixed;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        max-height: 82dvh;
+        overflow-y: auto;
+        -webkit-overflow-scrolling: touch;
+        background: #071512;
+        border-top: 2px solid var(--gold);
+        border-radius: 16px 16px 0 0;
+        padding: 12px 12px calc(18px + env(safe-area-inset-bottom)) 12px;
+        z-index: 56;
+        box-shadow: 0 -12px 35px rgba(0, 0, 0, 0.8);
+        transform: translateY(105%);
+        transition: transform 0.24s cubic-bezier(0.22, 1, 0.36, 1);
+      }
+
+      .side-panel.mobile-open {
+        transform: translateY(0);
+      }
+
+      /* Prevent iOS Safari auto-zoom when focusing text inputs */
+      .chat-input-row input,
+      .sdp-box textarea {
+        font-size: 16px;
+      }
+      .room-code-input {
+        font-size: 20px;
+      }
+    }
+
+    /* Portrait Smartphone Fine-Tuning (<= 640px wide) */
+    @media (max-width: 640px) {
+      :root {
+        --tile-sm-w: 23px;
+        --tile-sm-h: 33px;
+      }
+
+      .btn-label-desktop { display: none; }
+
+      .seat-zone { gap: 4px; }
+
+      .seat-header {
+        padding: 4px 7px;
+        gap: 4px;
+      }
+
+      .wind-badge {
+        width: 22px;
+        height: 22px;
+        font-size: 12px;
+      }
+
+      .score-num { font-size: 14px; }
+      .stat-mini-pills .pill { font-size: 9.5px; padding: 1px 5px; }
+      #oppHoverHint { display: none; }
+
+      /* Compact Center HUD & Rivers so everything fits comfortably in Portrait */
+      .battle-field {
+        grid-template-columns: 1fr;
+        gap: 4px;
+        margin: 2px 0;
+      }
+
+      .river-box {
+        min-height: 52px;
+        padding: 4px 6px;
+        gap: 2px;
+        border-radius: 8px;
+      }
+
+      .river-tiles { gap: 2px; }
+
+      .center-hud {
+        flex-direction: row;
+        flex-wrap: wrap;
+        justify-content: space-between;
+        align-items: center;
+        padding: 5px 8px;
+        gap: 4px 8px;
+        min-width: 0;
+        border-radius: 9px;
+      }
+
+      .round-title { font-size: 14px; }
+      .hud-counters { font-size: 10.5px; gap: 7px; }
+      .dora-strip { margin-top: 0; }
+      .turn-banner {
+        width: 100%;
+        font-size: 10.5px;
+        padding: 2px 8px;
+      }
+
+      /* Stack open melds cleanly without squeezing player's 14 tiles */
+      .hand-and-melds {
+        flex-direction: column-reverse;
+        align-items: stretch;
+        gap: 4px;
+        min-height: 0;
+      }
+
+      .melds-row {
+        justify-content: flex-end;
+        gap: 4px;
+      }
+
+      /* Opponent hand compact row */
+      #oppHand {
+        flex-wrap: nowrap;
+        gap: 1.5px;
+        overflow: hidden;
+      }
+      #oppHand .tile.sm {
+        width: clamp(17px, calc((100vw - 34px) / 14.5), 24px);
+        height: calc(clamp(17px, calc((100vw - 34px) / 14.5), 24px) * 1.42);
+      }
+
+      /* Player Hand Mode A (Default): Unbroken 1-Row Fit + Finger-Slide Magnifier */
+      #myHand {
+        touch-action: none; /* Smooth horizontal finger-slide across tiles without browser pan */
+        width: 100%;
+        justify-content: center;
+      }
+
+      #myHand:not(.large-2row) {
+        --tile-w: clamp(21px, calc((100vw - 26px) / 14.45), 42px);
+        --tile-h: calc(var(--tile-w) * 1.44);
+        flex-wrap: nowrap;
+        gap: 1.5px;
+        padding-top: 15px;
+        padding-bottom: 2px;
+      }
+
+      #myHand:not(.large-2row) .tile {
+        padding: 1.5px;
+        border-radius: 4px;
+      }
+
+      #myHand:not(.large-2row) .tile.drawn-gap {
+        margin-left: 5px;
+      }
+
+      /* Player Hand Mode B (Toggleable): Extra-Large Thumb-Friendly 2-Row Rack */
+      #myHand.large-2row {
+        --tile-w: clamp(38px, calc((100vw - 38px) / 7.4), 48px);
+        --tile-h: calc(var(--tile-w) * 1.41);
+        flex-wrap: wrap;
+        gap: 4px;
+        row-gap: 12px;
+        padding-top: 12px;
+        padding-bottom: 2px;
+      }
+
+      #myHand.large-2row .tile.drawn-gap {
+        margin-left: 7px;
+      }
+
+      .player-controls {
+        gap: 5px;
+        min-height: 32px;
+      }
+
+      .tenpai-bar {
+        font-size: 10.5px;
+        padding: 3px 7px;
+      }
+
+      .action-bar {
+        gap: 5px;
+        width: 100%;
+        justify-content: flex-end;
+      }
+
+      .act-btn {
+        font-size: 13px;
+        padding: 8px 13px;
+        min-height: 36px;
+      }
+
+      .coach-bar {
+        font-size: 10.5px;
+        padding: 4px 7px;
+      }
+
+      .eval-toast {
+        bottom: auto;
+        top: 52px;
+        right: 10px;
+        font-size: 11px;
+        padding: 4px 10px;
+      }
+
+      .call-splash { font-size: 30px; }
+
+      .modal-backdrop { padding: 8px; }
+      .modal-card {
+        padding: 13px 14px;
+        max-height: 92dvh;
+        gap: 9px;
+      }
+      .modal-title { font-size: 18px; }
+      .score-big { font-size: 20px; }
+    }
+
+    /* Landscape Smartphone Optimization (Wide & Short Viewport) */
+    @media (max-height: 520px) and (orientation: landscape) {
+      :root {
+        --tile-sm-w: 22px;
+        --tile-sm-h: 31px;
+      }
+
+      .topbar { padding: 3px 10px; }
+      .telemetry-pills { display: none; }
+      .mahjong-board { padding: 4px 10px; }
+      .seat-zone { gap: 3px; }
+      .seat-header { padding: 2px 8px; }
+      .battle-field {
+        grid-template-columns: 1fr auto 1fr;
+        gap: 6px;
+        margin: 1px 0;
+      }
+      .river-box { min-height: 48px; padding: 3px 6px; }
+      .center-hud { padding: 4px 10px; gap: 3px; min-width: 180px; }
+      .round-title { font-size: 13px; }
+      #myHand:not(.large-2row) {
+        --tile-w: clamp(30px, calc((100vw - 140px) / 15), 42px);
+        --tile-h: calc(var(--tile-w) * 1.38);
+        flex-wrap: nowrap;
+        padding-top: 8px;
+      }
+      .act-btn { padding: 5px 11px; font-size: 12px; }
+    }
   </style>
 </head>
 <body>
@@ -1208,7 +1635,7 @@
     <div class="brand">
       <div class="brand-logo">雀</div>
       <div>
-        <div class="brand-title">双龍麻雀 P2P — Duel Riichi Mahjong</div>
+        <div class="brand-title">双龍麻雀 P2P<span class="btn-label-desktop"> — Duel Riichi Mahjong</span></div>
         <div class="brand-sub">WebRTC Dual-Stack (IPv6 Priority / IPv4 Fallback) + 2ch Negotiated DataChannels</div>
       </div>
     </div>
@@ -1222,16 +1649,21 @@
     </div>
 
     <div class="top-actions">
-      <button id="btnToggleNetPanel" class="btn-gold">⚡ オンライン対戦</button>
-      <button id="btnPracticeCpu" class="btn-emerald">CPU対戦で試遊</button>
-      <button id="btnCoachToggle" class="btn-ghost" title="手牌ホバー時のシャンテン数・有効牌・放銃危険度ヒントをON/OFFします">🎓 練習ヒント: OFF</button>
-      <button id="btnRulesHelp" class="btn-ghost">ルール・仕様</button>
-      <button id="btnSoundToggle" class="btn-ghost">音: ON</button>
+      <button id="btnToggleNetPanel" class="btn-gold">⚡ <span class="btn-label-desktop">オンライン</span>対戦</button>
+      <button id="btnPracticeCpu" class="btn-emerald">CPU<span class="btn-label-desktop">対戦で試遊</span></button>
+      <button id="btnCoachToggle" class="btn-ghost" title="手牌選択時のシャンテン数・有効牌・放銃危険度ヒントをON/OFFします">🎓 ヒント: OFF</button>
+      <button id="btnMobileSheet" class="btn-ghost mobile-only" title="チャット・実力解析・通信ログを開く">💬<span id="chatUnreadDot" class="unread-dot hidden"></span></button>
+      <button id="btnRulesHelp" class="btn-ghost">❓<span class="btn-label-desktop"> ルール</span></button>
+      <button id="btnSoundToggle" class="btn-ghost">🔊</button>
     </div>
   </header>
 
   <!-- Simple Matchmaking Hub + Collapsible Manual SDP & ICE Diagnostics Drawer -->
   <section id="netPanel" class="net-drawer" style="grid-template-columns: 1fr;">
+    <div class="mobile-net-topbar">
+      <strong style="font-size:14px;color:var(--gold);">⚡ オンライン対戦・ルーム接続</strong>
+      <button id="btnCloseNetPanel" class="btn-ghost" style="padding:6px 12px;">✕ 卓画面へ閉じる</button>
+    </div>
     <div class="mm-hub">
       <div class="mm-grid">
         <!-- Quick Match Card -->
@@ -1256,10 +1688,10 @@
           <div>
             <div class="mm-card-title">
               <span>🔑 4桁ルーム番号対戦（フレンド・2画面対戦）</span>
-              <span class="pill v6" style="font-size:10px;">別PC・スマホ・別ブラウザ対応</span>
+              <span class="pill v6" style="font-size:10px;">スマホ・PC対応</span>
             </div>
             <div class="mm-card-desc" style="margin-top:5px;">
-              片方で「部屋を作る」を押して出た4桁の番号を、もう片方の画面に入力して「入室」するだけでつながります。
+              片方で「部屋を作る」を押して出た4桁の番号を、もう片方の画面に入力して「入室」（またはLINE等で招待URL共有）するだけでつながります。
             </div>
           </div>
 
@@ -1267,7 +1699,7 @@
             <button id="btnCreateRoom" class="btn-cyan" style="padding:11px 15px;font-size:13px;">＋ 部屋を作る (番号発行)</button>
 
             <div class="room-join-group">
-              <input id="roomCodeInput" class="room-code-input" type="text" inputmode="numeric" maxlength="4" placeholder="0000" />
+              <input id="roomCodeInput" class="room-code-input" type="text" inputmode="numeric" pattern="[0-9]*" maxlength="4" placeholder="0000" />
               <button id="btnJoinRoom" class="btn-emerald" style="padding:11px 16px;font-size:13px;flex:1;">番号で入室</button>
             </div>
           </div>
@@ -1278,8 +1710,9 @@
               <div id="roomIssuedDigits" class="room-digits">----</div>
             </div>
             <div class="btn-row">
+              <button id="btnShareRoomNative" class="btn-emerald">📲 LINE・SNSで招待</button>
               <button id="btnCopyRoomCode" class="btn-gold">番号コピー</button>
-              <button id="btnCopyRoomUrl" class="btn-ghost">招待URLコピー</button>
+              <button id="btnCopyRoomUrl" class="btn-ghost">URLコピー</button>
               <button id="btnCloseRoom" class="btn-crimson">閉じる</button>
             </div>
           </div>
@@ -1301,7 +1734,7 @@
       <details id="advNetDetails" class="adv-net-details">
         <summary>
           <span>🛠 詳細設定・手動SDPコピペ交換 / IPv6・2系統DataChannel通信診断を表示</span>
-          <span style="font-size:10.5px;color:#64748b;">クリックで開閉 ▼</span>
+          <span style="font-size:10.5px;color:#64748b;">タップで開閉 ▼</span>
         </summary>
 
         <div class="adv-grid">
@@ -1408,6 +1841,7 @@
 
       <div id="callSplash" class="call-splash">リーチ！</div>
       <div id="evalToast" class="eval-toast">✨ 最善手！</div>
+      <div id="chatToast" class="chat-toast">💬 相手: よろしくお願いします！</div>
 
       <!-- Opponent Seat -->
       <div class="seat-zone">
@@ -1420,7 +1854,7 @@
             </div>
             <span id="oppRiichiPill" class="riichi-stick-pill" style="display:none;">立直 RIICHI</span>
           </div>
-          <div style="display:flex;align-items:center;gap:10px;flex-wrap:wrap;">
+          <div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap;">
             <div class="stat-mini-pills">
               <span id="oppSkillPill" class="pill" title="相手の打牌精度スコア">実力: --</span>
               <span id="oppLuckPill" class="pill" title="相手の運量スコア">運: --</span>
@@ -1448,15 +1882,15 @@
         <div class="center-hud">
           <div id="roundLabel" class="round-title">東1局</div>
           <div class="hud-counters">
-            <span>山残り: <strong id="wallCount" style="color:#34d399;">--</strong></span>
+            <span>山: <strong id="wallCount" style="color:#34d399;">--</strong></span>
             <span>供託: <strong id="kyoutakuCount">0</strong></span>
             <span>本場: <strong id="honbaCount">0</strong></span>
           </div>
           <div class="dora-strip">
-            <span style="font-size:10.5px;color:#cbd5e1;margin-right:4px;">ドラ表示</span>
-            <div id="doraIndicators" style="display:flex;gap:3px;"></div>
+            <span style="font-size:10px;color:#cbd5e1;margin-right:3px;">ドラ</span>
+            <div id="doraIndicators" style="display:flex;gap:2px;"></div>
           </div>
-          <div id="turnBanner" class="turn-banner">P2P接続または「CPU対戦で試遊」を選択してください</div>
+          <div id="turnBanner" class="turn-banner">「⚡対戦」または「CPU」を選択してください</div>
           <button id="btnStartMatch" class="btn-gold" style="margin-top:2px;display:none;">対局開始 (牌山シャッフル)</button>
         </div>
 
@@ -1472,14 +1906,21 @@
       <!-- Player Seat -->
       <div class="seat-zone">
         <div class="player-controls">
-          <div id="tenpaiBar" class="tenpai-bar">
-            <span>手牌ステータス: 対局待機中</span>
+          <div style="display:flex;align-items:center;gap:5px;flex-wrap:wrap;">
+            <div id="tenpaiBar" class="tenpai-bar">
+              <span>手牌ステータス: 対局待機中</span>
+            </div>
+            <button id="btnTileSizeToggle" class="btn-ghost mobile-only" style="padding:4px 8px;font-size:10.5px;" title="スマホ縦持ち時の手牌表示を「1列フィット」と「特大2段」で切り替えます">🔍 牌:1列</button>
           </div>
           <div id="actionBar" class="action-bar"></div>
         </div>
 
+        <div id="touchSelectBar" class="touch-select-bar hidden">
+          <span id="touchSelectText">🀄 牌を選択中 — もう一度タップまたは「打牌」ボタンで切る</span>
+        </div>
+
         <div id="coachBar" class="coach-bar hidden">
-          <span id="coachBarMain">🎓 練習コーチングON: 手牌にカーソルを合わせると受入枚数・放銃危険度を解析します</span>
+          <span id="coachBarMain">🎓 練習ヒントON: 手牌をタップ/スライドすると受入枚数・放銃危険度を解析します</span>
           <span id="coachBarMode" class="pill ok" style="font-size:10px;">牌効率モード</span>
         </div>
 
@@ -1497,7 +1938,7 @@
             </div>
             <span id="myRiichiPill" class="riichi-stick-pill" style="display:none;">立直 RIICHI</span>
           </div>
-          <div style="display:flex;align-items:center;gap:10px;flex-wrap:wrap;">
+          <div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap;">
             <div class="stat-mini-pills">
               <span id="mySkillPill" class="pill ok" title="あなたの打牌精度（牌効率・守備判断の一致率）">実力: --</span>
               <span id="myLuckPill" class="pill" title="あなたの運量（配牌運＋ツモ運＋結果運）">運: --</span>
@@ -1508,15 +1949,22 @@
       </div>
     </section>
 
-    <!-- Sidebar: Reliable Channel Chat & Live Network Log -->
-    <aside class="side-panel">
+    <div id="mobileSheetBackdrop" class="mobile-sheet-backdrop"></div>
+
+    <!-- Sidebar (Desktop Right Column / Mobile Slide-Up Bottom Sheet): Chat, Live Analytics & Net Log -->
+    <aside id="sidePanel" class="side-panel">
+      <div class="mobile-only" style="justify-content:space-between;width:100%;padding-bottom:6px;border-bottom:1px solid rgba(148,163,184,0.2);">
+        <strong style="font-size:13.5px;color:var(--gold);">💬 対戦チャット・実力解析・通信ログ</strong>
+        <button id="btnCloseMobileSheet" class="btn-ghost" style="padding:5px 11px;">✕ 閉じる</button>
+      </div>
+
       <div class="side-box">
         <h4>
           <span>対戦チャット (Ch1 Reliable)</span>
           <span style="font-size:10px;color:#94a3b8;">ordered: true</span>
         </h4>
         <div id="chatMessages" class="chat-list">
-          <div class="chat-msg sys">ようこそ！「⚡ クイックマッチ」または「🔑 4桁ルーム番号」で別PC・スマホ・別ブラウザともワンクリックでP2P対局できます。</div>
+          <div class="chat-msg sys">ようこそ！「⚡ 対戦」からクイックマッチ・4桁ルーム番号・LINE招待でスマホ同士でもすぐP2P対局できます。</div>
         </div>
         <div class="stamp-row">
           <button class="stamp-btn" data-stamp="よろしくお願いします！">よろしく</button>
@@ -4014,6 +4462,13 @@
       this.remoteHoverIdx = 255;
       this.riichiArmed = false;
       this.coachEnabled = false;
+      this.selectedTileId = null;
+      this.large2RowHand = false;
+      this.mobileSheetOpen = false;
+      this._handItemMap = new Map();
+      this._touchStartTileId = null;
+      this._touchDidScrub = false;
+      this._justSelectedOnStart = false;
       this.nextReadySeats = new Set();
 
       this.net = new DualStackP2PNetwork({
@@ -4079,6 +4534,22 @@
       }
     }
 
+    toggleMobileSheet(forceOpen) {
+      const panel = document.getElementById("sidePanel");
+      const backdrop = document.getElementById("mobileSheetBackdrop");
+      const dot = document.getElementById("chatUnreadDot");
+      this.mobileSheetOpen = typeof forceOpen === "boolean" ? forceOpen : !this.mobileSheetOpen;
+      if (panel) panel.classList.toggle("mobile-open", this.mobileSheetOpen);
+      if (backdrop) backdrop.classList.toggle("open", this.mobileSheetOpen);
+      if (this.mobileSheetOpen && dot) dot.classList.add("hidden");
+    }
+
+    isTouchMode(pointerType) {
+      if (pointerType === "touch" || pointerType === "pen") return true;
+      if (pointerType === "mouse" && window.innerWidth > 900) return false;
+      return (window.matchMedia && window.matchMedia("(pointer: coarse)").matches) || window.innerWidth <= 900;
+    }
+
     /* ---------------- UI Event Wiring ---------------- */
     bindUI() {
       const $ = (id) => document.getElementById(id);
@@ -4086,17 +4557,38 @@
       $("btnToggleNetPanel").onclick = () => {
         $("netPanel").classList.toggle("hidden");
       };
+      if ($("btnCloseNetPanel")) {
+        $("btnCloseNetPanel").onclick = () => $("netPanel").classList.add("hidden");
+      }
+      if ($("btnMobileSheet")) {
+        $("btnMobileSheet").onclick = () => this.toggleMobileSheet();
+      }
+      if ($("btnCloseMobileSheet")) {
+        $("btnCloseMobileSheet").onclick = () => this.toggleMobileSheet(false);
+      }
+      if ($("mobileSheetBackdrop")) {
+        $("mobileSheetBackdrop").onclick = () => this.toggleMobileSheet(false);
+      }
+      if ($("btnTileSizeToggle")) {
+        $("btnTileSizeToggle").onclick = () => {
+          this.large2RowHand = !this.large2RowHand;
+          $("myHand").classList.toggle("large-2row", this.large2RowHand);
+          $("btnTileSizeToggle").textContent = this.large2RowHand ? "🔍 牌:大2段" : "🔍 牌:1列";
+          $("btnTileSizeToggle").className = this.large2RowHand ? "btn-cyan mobile-only" : "btn-ghost mobile-only";
+        };
+      }
+
       $("btnRulesHelp").onclick = () => $("rulesModal").classList.remove("hidden");
       $("btnCloseRules").onclick = () => $("rulesModal").classList.add("hidden");
 
       $("btnSoundToggle").onclick = () => {
         sfx.enabled = !sfx.enabled;
-        $("btnSoundToggle").textContent = `音: ${sfx.enabled ? "ON" : "OFF"}`;
+        $("btnSoundToggle").textContent = sfx.enabled ? "🔊" : "🔇";
       };
 
       $("btnCoachToggle").onclick = () => {
         this.coachEnabled = !this.coachEnabled;
-        $("btnCoachToggle").textContent = `🎓 練習ヒント: ${this.coachEnabled ? "ON" : "OFF"}`;
+        $("btnCoachToggle").textContent = `🎓 ヒント: ${this.coachEnabled ? "ON" : "OFF"}`;
         $("btnCoachToggle").className = this.coachEnabled ? "btn-emerald" : "btn-ghost";
         $("coachBar").classList.toggle("hidden", !this.coachEnabled);
         this.renderView();
@@ -4124,11 +4616,38 @@
         if (e.key === "Enter") triggerRoomJoin();
       });
 
+      if ($("btnShareRoomNative")) {
+        $("btnShareRoomNative").onclick = async () => {
+          const code = this.matchmaker.roomCode;
+          if (!code) return;
+          const base = location.href.split("#")[0];
+          const url = `${base}#room=${code}`;
+          const shareData = {
+            title: "双龍麻雀 P2P — 2人対戦招待",
+            text: `双龍麻雀でオンライン対戦しよう！4桁ルーム番号: 【${code}】`,
+            url
+          };
+          if (navigator.share) {
+            try {
+              await navigator.share(shareData);
+              logNet(`ルーム招待 (#room=${code}) を共有シートから送信しました`, "ok");
+              return;
+            } catch (_) {}
+          }
+          try {
+            await navigator.clipboard.writeText(url);
+            this.showEvalToast(`📋 招待URL (#room=${code}) をコピーしました`);
+            logNet(`ルーム招待URL (#room=${code}) をコピーしました`, "ok");
+          } catch (_) {}
+        };
+      }
+
       $("btnCopyRoomCode").onclick = async () => {
         const code = this.matchmaker.roomCode;
         if (!code) return;
         try {
           await navigator.clipboard.writeText(code);
+          this.showEvalToast(`📋 番号 ${code} をコピーしました`);
           logNet(`ルーム番号 ${code} をコピーしました`, "ok");
         } catch (_) {}
       };
@@ -4140,6 +4659,7 @@
         const url = `${base}#room=${code}`;
         try {
           await navigator.clipboard.writeText(url);
+          this.showEvalToast(`📋 招待URLをコピーしました`);
           logNet(`ルーム招待URL (#room=${code}) をコピーしました`, "ok");
         } catch (_) {}
       };
@@ -4286,9 +4806,13 @@
         this.localCursor.y = Math.max(0, Math.min(1, (ev.clientY - rect.top) / rect.height));
         this.localCursor.dirty = true;
       });
-      board.addEventListener("pointerdown", () => {
+      board.addEventListener("pointerdown", (ev) => {
         this.localCursor.down = true;
         this.localCursor.dirty = true;
+        // Tapping empty felt outside hand tiles & buttons clears touch tile selection
+        if (this.selectedTileId !== null && ev.target && !ev.target.closest("#myHand") && !ev.target.closest("button")) {
+          this.selectHandTileUI(null);
+        }
       });
       window.addEventListener("pointerup", () => {
         if (this.localCursor.down) {
@@ -4296,6 +4820,64 @@
           this.localCursor.dirty = true;
         }
       });
+
+      // Smartphone Finger-Slide Scrubbing & 2-Step Anti-Misfire Touch Selection on #myHand
+      const myHandEl = $("myHand");
+      myHandEl.addEventListener("touchstart", (ev) => {
+        if (!ev.touches || ev.touches.length !== 1) return;
+        const tileEl = ev.target && ev.target.closest ? ev.target.closest(".tile[data-tile-id]") : null;
+        if (!tileEl) {
+          this._touchStartTileId = null;
+          return;
+        }
+        const tid = Number(tileEl.dataset.tileId);
+        const item = this._handItemMap.get(tid);
+        if (!item || !item.canClick) {
+          this._touchStartTileId = null;
+          return;
+        }
+        this._touchStartTileId = tid;
+        this._touchDidScrub = false;
+        if (this.selectedTileId !== tid) {
+          this._justSelectedOnStart = true;
+          this.selectHandTileUI(tid);
+        } else {
+          this._justSelectedOnStart = false;
+        }
+      }, { passive: true });
+
+      myHandEl.addEventListener("touchmove", (ev) => {
+        if (!ev.touches || ev.touches.length !== 1) return;
+        const t = ev.touches[0];
+        const rect = board.getBoundingClientRect();
+        if (rect.width > 0 && rect.height > 0) {
+          this.localCursor.x = Math.max(0, Math.min(1, (t.clientX - rect.left) / rect.width));
+          this.localCursor.y = Math.max(0, Math.min(1, (t.clientY - rect.top) / rect.height));
+          this.localCursor.dirty = true;
+        }
+        const hit = document.elementFromPoint(t.clientX, t.clientY);
+        const tileEl = hit && hit.closest ? hit.closest("#myHand .tile[data-tile-id]") : null;
+        if (!tileEl) return;
+        const tid = Number(tileEl.dataset.tileId);
+        if (tid !== this._touchStartTileId) {
+          this._touchDidScrub = true;
+        }
+        const item = this._handItemMap.get(tid);
+        if (item && item.canClick && this.selectedTileId !== tid) {
+          this.selectHandTileUI(tid);
+        }
+      }, { passive: true });
+
+      myHandEl.addEventListener("touchend", (ev) => {
+        if (this._touchStartTileId === null) return;
+        const endedOnSelectedWithoutScrub =
+          !this._touchDidScrub && !this._justSelectedOnStart && this.selectedTileId === this._touchStartTileId;
+        this._touchStartTileId = null;
+        if (ev.cancelable) ev.preventDefault();
+        if (endedOnSelectedWithoutScrub && this.selectedTileId !== null) {
+          this.executeTileDiscard(this.selectedTileId);
+        }
+      }, { passive: false });
     }
 
     checkUrlHashSdp() {
@@ -4421,6 +5003,15 @@
       }
     }
 
+    showChatToast(who, text) {
+      const toast = document.getElementById("chatToast");
+      if (!toast) return;
+      toast.textContent = `💬 ${who}: ${text}`;
+      toast.classList.add("show");
+      clearTimeout(this._chatToastTimer);
+      this._chatToastTimer = setTimeout(() => toast.classList.remove("show"), 3200);
+    }
+
     addChat(who, text, isSys = false, isMe = false) {
       const box = document.getElementById("chatMessages");
       const div = document.createElement("div");
@@ -4434,6 +5025,11 @@
         spanWho.textContent = `${who}:`;
         div.appendChild(spanWho);
         div.appendChild(document.createTextNode(text));
+        if (!isMe) {
+          this.showChatToast(who, text);
+          const dot = document.getElementById("chatUnreadDot");
+          if (dot && !this.mobileSheetOpen) dot.classList.remove("hidden");
+        }
       }
       box.appendChild(div);
       box.scrollTop = box.scrollHeight;
@@ -5249,11 +5845,14 @@
 
       // Turn Banner
       const tb = $("turnBanner");
+      const touchHint = this.isTouchMode();
       if (v.phase === "ended") {
         tb.textContent = "局終了 — 結果を確認してください";
         tb.className = "turn-banner";
       } else if (v.isMyTurn) {
-        tb.textContent = this.riichiArmed ? "リーチ宣言牌を選択してください" : "あなたの手番です（牌をクリックして打牌）";
+        tb.textContent = this.riichiArmed
+          ? "リーチ宣言牌を選択して打牌してください"
+          : (touchHint ? "あなたの手番（牌をスライド選択 → 再タップor打牌ボタン）" : "あなたの手番です（牌をクリックして打牌）");
         tb.className = "turn-banner my-turn";
       } else if (v.phase === "reaction" && (v.legal.canRon || v.legal.canPon || v.legal.canDaiminkan)) {
         tb.textContent = "相手の打牌に対してアクション可能です！";
@@ -5290,7 +5889,7 @@
       // Tenpai / Waits Bar
       const tenpaiBar = $("tenpaiBar");
       if (v.waits && v.waits.length > 0) {
-        tenpaiBar.innerHTML = `<strong style="color:#34d399;">聴牌 (待ち牌):</strong> ` +
+        tenpaiBar.innerHTML = `<strong style="color:#34d399;">聴牌 (待ち):</strong> ` +
           v.waits.map(wk => `<span class="pill ok" style="padding:1px 6px;">${KIND_NAMES[wk]}</span>`).join(" ");
       } else {
         tenpaiBar.innerHTML = `<span>手牌: ${v.myHand.length + (v.myDrawn ? 1 : 0)}枚 (副露 ${v.myMelds.length})</span>`;
@@ -5299,6 +5898,9 @@
       // Player Interactive Hand
       const myHandEl = $("myHand");
       myHandEl.innerHTML = "";
+      myHandEl.classList.toggle("large-2row", this.large2RowHand);
+      this._handItemMap.clear();
+
       const allMyTiles = v.myHand.map((t, idx) => ({ tile: t, isDrawn: false, slotIdx: idx }));
       if (v.myDrawn) {
         allMyTiles.push({ tile: v.myDrawn, isDrawn: true, slotIdx: allMyTiles.length });
@@ -5308,6 +5910,11 @@
       const coachMap = new Map();
       if (v.coachData && v.coachData.options) {
         for (const opt of v.coachData.options) coachMap.set(opt.tileId, opt);
+      }
+
+      // Reset touch selection if it is no longer player's turn
+      if (!v.isMyTurn) {
+        this.selectedTileId = null;
       }
 
       // Update Coach Bar default state when Coaching is ON
@@ -5345,7 +5952,9 @@
         if (this.riichiArmed && riichiSet.has(tile.id)) cls += " selected-riichi";
 
         const el = this.createTileEl(tile, cls);
+        el.dataset.tileId = String(tile.id);
         const cOpt = coachMap.get(tile.id);
+        this._handItemMap.set(tile.id, { el, tile, slotIdx, canClick, cOpt });
 
         if (this.coachEnabled && canClick && cOpt) {
           if (cOpt.tileId === v.coachData.bestTileId) {
@@ -5367,7 +5976,8 @@
           }
         }
 
-        el.addEventListener("pointerenter", () => {
+        el.addEventListener("pointerenter", (ev) => {
+          if (ev.pointerType === "touch") return; // Handled smoothly via touchstart/touchmove
           this.localCursor.hoverIdx = slotIdx;
           this.localCursor.dirty = true;
           if (this.coachEnabled && cOpt) {
@@ -5378,7 +5988,8 @@
               `🔍 【${KIND_NAMES[tile.k]}】切り (${verdictTag}): ${shTxt} | 有効牌 ${cOpt.ukeireTotal}枚${ukDetail} | 危険度 ${cOpt.dangerPct}% (${cOpt.safetyLabel})`;
           }
         });
-        el.addEventListener("pointerleave", () => {
+        el.addEventListener("pointerleave", (ev) => {
+          if (ev.pointerType === "touch") return;
           if (this.localCursor.hoverIdx === slotIdx) {
             this.localCursor.hoverIdx = 255;
             this.localCursor.dirty = true;
@@ -5386,19 +5997,44 @@
         });
         if (canClick) {
           el.onclick = () => {
-            const act = this.riichiArmed ? "RIICHI_DISCARD" : "DISCARD";
-            this.riichiArmed = false;
-            this.localCursor.hoverIdx = 255;
-            this.localCursor.dirty = true;
-            this.sendAction({ act, tileId: tile.id });
+            if (this.isTouchMode()) {
+              if (this.selectedTileId === tile.id) {
+                this.executeTileDiscard(tile.id);
+              } else {
+                this.selectHandTileUI(tile.id);
+              }
+            } else {
+              this.executeTileDiscard(tile.id);
+            }
           };
         }
         myHandEl.appendChild(el);
       });
 
-      // Action Buttons (Tsumo / Ron / Riichi / Pon / Kan / Skip)
+      // Validate existing selectedTileId against current clickable hand
+      if (this.selectedTileId !== null) {
+        const curItem = this._handItemMap.get(this.selectedTileId);
+        if (!curItem || !curItem.canClick) {
+          this.selectedTileId = null;
+        }
+      }
+
+      // Action Buttons (Confirm Discard + Tsumo / Ron / Riichi / Pon / Kan / Skip)
       const actBar = $("actionBar");
       actBar.innerHTML = "";
+
+      // Prominent Thumb Discard Button for Smartphone 2-Step Selection
+      const confirmDiscardBtn = document.createElement("button");
+      confirmDiscardBtn.id = "btnConfirmDiscard";
+      confirmDiscardBtn.className = "act-btn act-discard-confirm";
+      confirmDiscardBtn.style.display = "none";
+      confirmDiscardBtn.onclick = () => {
+        if (this.selectedTileId !== null) {
+          this.executeTileDiscard(this.selectedTileId);
+        }
+      };
+      actBar.appendChild(confirmDiscardBtn);
+
       const addBtn = (label, cls, fn) => {
         const b = document.createElement("button");
         b.className = `act-btn ${cls}`;
@@ -5417,6 +6053,9 @@
         if (!this.riichiArmed) {
           addBtn("リーチ", "act-riichi", () => {
             this.riichiArmed = true;
+            if (this.isTouchMode() && v.legal.riichiDiscardIds.length > 0) {
+              this.selectedTileId = v.legal.riichiDiscardIds[0];
+            }
             this.localCursor.dirty = true;
             this.renderView();
           });
@@ -5442,6 +6081,71 @@
       }
       if (v.phase === "reaction" && (v.legal.canRon || v.legal.canPon || v.legal.canDaiminkan)) {
         addBtn("スキップ", "btn-ghost", () => this.sendAction({ act: "SKIP_REACTION" }));
+      }
+
+      // Apply visual highlight & confirm button state if a tile is currently selected
+      this.selectHandTileUI(this.selectedTileId);
+    }
+
+    executeTileDiscard(tileId) {
+      const act = this.riichiArmed ? "RIICHI_DISCARD" : "DISCARD";
+      this.riichiArmed = false;
+      this.selectedTileId = null;
+      this.localCursor.hoverIdx = 255;
+      this.localCursor.dirty = true;
+      this.sendAction({ act, tileId });
+    }
+
+    selectHandTileUI(tileId) {
+      const $ = (id) => document.getElementById(id);
+      const item = tileId !== null ? this._handItemMap.get(tileId) : null;
+      if (!item || !item.canClick) {
+        this.selectedTileId = null;
+      } else {
+        this.selectedTileId = tileId;
+      }
+
+      for (const [tid, entry] of this._handItemMap.entries()) {
+        entry.el.classList.toggle("touch-selected", tid === this.selectedTileId);
+      }
+
+      const selBar = $("touchSelectBar");
+      const selTxt = $("touchSelectText");
+      const confirmBtn = $("btnConfirmDiscard");
+
+      if (this.selectedTileId !== null && item) {
+        const akaPrefix = item.tile.aka ? "赤" : "";
+        const tileLabel = `${akaPrefix}${KIND_NAMES[item.tile.k]}`;
+        this.localCursor.hoverIdx = item.slotIdx;
+        this.localCursor.dirty = true;
+
+        if (confirmBtn) {
+          confirmBtn.textContent = this.riichiArmed
+            ? `🀄 【${tileLabel}】でリーチ打牌`
+            : `🀄 【${tileLabel}】を打牌`;
+          confirmBtn.style.display = "inline-flex";
+        }
+
+        if (selBar && selTxt) {
+          selTxt.textContent = `🀄 選択中: 【${tileLabel}】 — もう一度タップ または「打牌」ボタンで切る`;
+          selBar.classList.toggle("hidden", this.coachEnabled); // If coachBar is shown, avoid double bars
+        }
+
+        if (this.coachEnabled && item.cOpt && $("coachBarMain")) {
+          const cOpt = item.cOpt;
+          const shTxt = cOpt.shanten <= 0 ? "聴牌" : `${cOpt.shanten}向聴`;
+          const verdictTag = cOpt.isBest ? "✨最善候補" : "候補比較";
+          const ukDetail = cOpt.ukeirePreview ? ` [${cOpt.ukeirePreview}]` : "";
+          $("coachBarMain").textContent =
+            `🔍 選択中【${tileLabel}】(${verdictTag}): ${shTxt} | 有効牌 ${cOpt.ukeireTotal}枚${ukDetail} | 危険度 ${cOpt.dangerPct}% (${cOpt.safetyLabel})`;
+        }
+      } else {
+        if (confirmBtn) confirmBtn.style.display = "none";
+        if (selBar) selBar.classList.add("hidden");
+        if (this.localCursor.hoverIdx !== 255 && this.isTouchMode()) {
+          this.localCursor.hoverIdx = 255;
+          this.localCursor.dirty = true;
+        }
       }
     }
 
